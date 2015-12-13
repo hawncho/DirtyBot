@@ -89,7 +89,7 @@ dirtyBot.on("message", function(msg){
 			"!color <color> - Set your name color.\n" + 
 			"!flip - Flip a coin.\n" + 
 			"!roll <min>-<max> - Roll a random number between <min> and <max>.\n" +
-			"!shouldi <question> - Ask DirtyBot a yes or no question."
+			"!shouldi <question> - Ask DirtyBot a yes or no question. (Also works with !shouldhe, !shouldshe, ...)"
 		);
 	
 	// add the user to the role with a specified color
@@ -129,7 +129,11 @@ dirtyBot.on("message", function(msg){
 		dirtyBot.sendMessage(msg.channel, msg.author.username + " flipped and got " + result + "!");
 	
 	// answer a yes/no question
-	} else if (msg.content.indexOf("!shouldi") === 0) {
+	} else if (msg.content.indexOf("!shouldi") === 0 ||
+				msg.content.indexOf("!shouldhe") === 0 ||
+				msg.content.indexOf("!shouldshe") === 0 ||
+				msg.content.indexOf("!shouldwe") === 0 ||
+				msg.content.indexOf("!shouldthey") === 0) {
 		var answer = 0;
 	
 		if (trueOrFalse()) answer = 1;
