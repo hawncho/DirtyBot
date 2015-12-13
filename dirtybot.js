@@ -1,15 +1,29 @@
 var Discord = require("discord.js");
 
-// list of valid role colors
-var validColors = ["green", "emerald", "blue", "cyan", "indigo", "violet", "red", "magenta", "gold", "yellow", "redorange", "orange"];
-
 // Get the email and password
 var authDetails = require("./auth.json");
  
 var dirtyBot = new Discord.Client();
 
+// list of valid role colors
+var validColors = ["green", "emerald", "blue", "cyan", "indigo", "violet", "red", "magenta", "gold", "yellow", "redorange", "orange"];
+
+var userToChannel = [];
+
 // when the bot is ready
 dirtyBot.on("ready", function () {
+	// temporary until I find a way to see what voice channel a user is currently in
+	const defaultChannelId = 121801859156410369;
+	
+	// track all online user's current voice channel
+	var user;
+	for (var i = 0; i < dirtyBot.users.length; i++) {
+		user = dirtyBot.users[i];
+		if (user.status !== "offline") {
+			userToChannel[user.id] = defaultChannelId;
+		}
+	}
+	
 	console.log("Ready to begin! Serving in " + dirtyBot.channels.length + " channels");
 });
 
@@ -19,6 +33,36 @@ dirtyBot.on("disconnected", function () {
 
 	// exit node.js with an error
 	process.exit(1);
+});
+
+dirtyBot.on("raw", function (packet) {
+	switch (packet.t) {
+		// when a user joins or leaves a channel
+		// or when a user has their voice status (mute, deaf) changed
+		case "VOICE_STATE_UPDATE":
+			var server = dirtyBot.servers.get("id", packet.d.guild_id);
+			var user = dirtyBot.users.get("id", packet.d.user_id);
+			var channel = dirtyBot.channels.get("id", packet.d.channel_id);
+			
+			var statusMessage;
+			
+			if (channel) {
+				if (userToChannel[user.id] === channel.id) break;
+				userToChannel[user.id] = channel.id;
+			
+				statusMessage = user.username + " has joined \"" + channel.name + "\".";
+			} else {
+				userToChannel[user.id] = null;
+				
+				statusMessage = user.username + " has left the server.";
+			}
+			
+			dirtyBot.sendMessage(server.defaultChannel, statusMessage);
+			
+			console.log(server.name + ": " + statusMessage);
+			
+			break;
+	}
 });
 
 // when the bot receives a message
