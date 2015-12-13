@@ -1,12 +1,17 @@
 var Discord = require("discord.js");
 
 // Get the email and password
-var authDetails = require("./auth.json");
+var authDetails = require("../auth.json");
  
 var dirtyBot = new Discord.Client();
 
 // list of valid role colors
-var validColors = ["green", "emerald", "blue", "cyan", "indigo", "violet", "red", "magenta", "gold", "yellow", "redorange", "orange"];
+const validColors = ["green", "emerald", "blue", "cyan", "indigo", "violet", "red", "magenta", "gold", "yellow", "redorange", "orange"];
+
+const response = {
+	0: ["Yes.", "Absolutely.", "You should do it twice."],
+	1: ["No.", "Nah.", "Definitely not."]
+};
 
 var userToChannel = [];
 
@@ -74,7 +79,8 @@ dirtyBot.on("message", function(msg){
 			"!help - Show a list of all commands.\n" +
 			"!color <color> - Set your name color.\n" + 
 			"!flip - Flip a coin.\n" + 
-			"!roll <min>-<max> - Roll a random number between <min> and <max>."
+			"!roll <min>-<max> - Roll a random number between <min> and <max>.\n" +
+			"!shouldi <question> - Ask DirtyBot a yes or no question."
 		);
 	
 	// add the user to the role with a specified color
@@ -102,19 +108,27 @@ dirtyBot.on("message", function(msg){
 		
 		var roll = Math.floor(Math.random() * (max - min + 1)) + min;
 		
-		dirtyBot.sendMessage(msg.channel, msg.author.username + " rolled " + roll + "!");
+		dirtyBot.sendMessage(msg.channel, msg.author.username + " rolled " + roll + "! Range: (" + min + " - " + max + ")");
 		
 	// flip a coin
 	} else if (msg.content === "!flip") {
-		var rand = Math.random();
 		var result;
 		
-		if (rand < 0.5) result = "HEADS";
+		if (trueOrFalse()) result = "HEADS";
 		else result = "TAILS";
 		
 		dirtyBot.sendMessage(msg.channel, msg.author.username + " flipped and got " + result + "!");
-	}
 	
+	// answer a yes/no question
+	} else if (msg.content.indexOf("!shouldi") === 0) {
+		var answer = 0;
+	
+		if (trueOrFalse()) answer = 1;
+		
+		var responseIndex = Math.floor(Math.random() * (response[answer].length));
+		
+		dirtyBot.sendMessage(msg.channel, response[answer][responseIndex]);
+	}
 });
 
 function displayAllAvailableColors(channel) {
@@ -205,6 +219,13 @@ function isColorRole(role) {
 		color = validColors[i];
 		if (role.name === "@" + color) return true;
 	}
+}
+
+function trueOrFalse() {
+	var rand = Math.random();
+	
+	if (rand < 0.5) return true;
+	else return false;
 }
 
 dirtyBot.login(authDetails.email, authDetails.password);
