@@ -28,9 +28,7 @@ dirtyBot.on("ready", function () {
 			userToChannel[user.id] = defaultChannelId;
 		}
 	}
-	
-	console.log("default: " + defaultChannelId + " / stored: " + userToChannel[dirtyBot.users.get("username", "poncho").id]);
-	
+		
 	console.log("Ready to begin! Serving in " + dirtyBot.channels.length + " channels");
 });
 
@@ -55,8 +53,6 @@ dirtyBot.on("raw", function (packet) {
 			
 			if (channel) {
 				var oldChannelId = userToChannel[user.id];
-				
-				console.log("old: " + oldChannelId + " / new: " + channel.id);
 				
 				if (oldChannelId === channel.id) break;
 				
