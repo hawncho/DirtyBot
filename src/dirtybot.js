@@ -18,7 +18,7 @@ var userToChannel = [];
 // when the bot is ready
 dirtyBot.on("ready", function () {
 	// temporary until I find a way to see what voice channel a user is currently in
-	const defaultChannelId = 121801859156410369;
+	const defaultChannelId = dirtyBot.channels.get("name", "The Dirty Den").id;
 	
 	// track all online user's current voice channel
 	var user;
@@ -28,6 +28,8 @@ dirtyBot.on("ready", function () {
 			userToChannel[user.id] = defaultChannelId;
 		}
 	}
+	
+	console.log("default: " + defaultChannelId + " / stored: " + userToChannel[dirtyBot.users.get("username", "poncho").id]);
 	
 	console.log("Ready to begin! Serving in " + dirtyBot.channels.length + " channels");
 });
@@ -52,10 +54,21 @@ dirtyBot.on("raw", function (packet) {
 			var statusMessage;
 			
 			if (channel) {
-				if (userToChannel[user.id] === channel.id) break;
+				var oldChannelId = userToChannel[user.id];
+				
+				console.log("old: " + oldChannelId + " / new: " + channel.id);
+				
+				if (oldChannelId === channel.id) break;
+				
 				userToChannel[user.id] = channel.id;
-			
-				statusMessage = user.username + " has joined \"" + channel.name + "\".";
+				
+				if (oldChannelId) {
+					oldChannel = dirtyBot.channels.get("id", oldChannelId);
+					
+					statusMessage = user.username + " moved from \"" + oldChannel.name + "\" to \"" + channel.name + "\".";
+				} else {
+					statusMessage = user.username + " has joined \"" + channel.name + "\".";
+				}
 			} else {
 				userToChannel[user.id] = null;
 				
