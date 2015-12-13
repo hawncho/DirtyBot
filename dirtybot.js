@@ -72,7 +72,9 @@ dirtyBot.on("message", function(msg){
 		dirtyBot.sendMessage(msg.channel, 
 			"\n" +
 			"!help - Show a list of all commands.\n" +
-			"!color <color> - Set your name color."
+			"!color <color> - Set your name color.\n" + 
+			"!flip - Flip a coin.\n" + 
+			"!roll <min>-<max> - Roll a random number between <min> and <max>."
 		);
 	
 	// add the user to the role with a specified color
@@ -80,7 +82,39 @@ dirtyBot.on("message", function(msg){
 		var color = msg.content.split(" ")[1];
 		
 		setUserColor(msg.author, color, msg.channel);
+		
+	// roll a random number
+	} else if (msg.content.indexOf("!roll") === 0) {
+		var range = msg.content.split(" ")[1];
+		
+		var min = 1;
+		var max = 100;
+		
+		if (range) {
+			range = range.split("-");
+			
+			// if there are two valid numbers
+			if (range.length === 2 && !isNaN(range[0]) && !isNaN(range[1])) {
+				min = parseInt(range[0]);
+				max = parseInt(range[1]);
+			}
+		}
+		
+		var roll = Math.floor(Math.random() * (max - min + 1)) + min;
+		
+		dirtyBot.sendMessage(msg.channel, msg.author.username + " rolled " + roll + "!");
+		
+	// flip a coin
+	} else if (msg.content === "!flip") {
+		var rand = Math.random();
+		var result;
+		
+		if (rand < 0.5) result = "HEADS";
+		else result = "TAILS";
+		
+		dirtyBot.sendMessage(msg.channel, msg.author.username + " flipped and got " + result + "!");
 	}
+	
 });
 
 function displayAllAvailableColors(channel) {
