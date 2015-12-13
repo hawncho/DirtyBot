@@ -9,8 +9,8 @@ var dirtyBot = new Discord.Client();
 const validColors = ["green", "emerald", "blue", "cyan", "indigo", "violet", "red", "magenta", "gold", "yellow", "redorange", "orange"];
 
 const response = {
-	0: ["Yes.", "Absolutely.", "You should do it twice."],
-	1: ["No.", "Nah.", "Definitely not."]
+	0: ["Yes.", "Absolutely.", "You should do it twice.", "Fo' shizzle.", "You bet.", "Sure.", "Go right ahead."],
+	1: ["No.", "Nah.", "Nope", "Definitely not.", "Nah, bitch.", "Nononononono.", "Maybe another time.", ]
 };
 
 var userToChannel = [];
