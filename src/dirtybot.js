@@ -37,7 +37,7 @@ const navySealCopypasta = "What the fuck did you just fucking say about me, you 
 
 const response = {
 	0: ["Yes.", "Absolutely.", "You should do it twice.", "Fo' shizzle.", "You bet.", "Sure.", "Go right ahead.", "Does a bear shit in the woods?"],
-	1: ["No.", "Nah.", "Nope.", "Definitely not.", "Nah, bitch.", "Nononononono.", "Maybe another time.", "Maybe someday.", "Try asking again.", navySealCopypasta];
+	1: ["No.", "Nah.", "Nope.", "Definitely not.", "Nah, bitch.", "Nononononono.", "Maybe another time.", "Maybe someday.", "Try asking again.", navySealCopypasta]
 };
 
 var userToChannel = [];
