@@ -1,0 +1,25 @@
+{
+  "name": "dirtybot",
+  "version": "0.0.1",
+  "description": "A Discord bot using the unofficial node module discord.js.",
+  "main": "src/dirtybot.js",
+  "scripts": {
+    "start": "node src/dirtybot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hawncho/DirtyBot"
+  },
+  "dependencies": {
+    "discord.js": "5.0.0"
+  },
+  "engines": {
+    "node": "5.2.0"
+  },
+  "author": "hawncho",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hawncho/DirtyBot/issues"
+  },
+  "homepage": "https://github.com/hawncho/DirtyBot#readme"
+}
