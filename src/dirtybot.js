@@ -1,5 +1,12 @@
 var Discord = require("discord.js");
 
+var http = require('http');
+http.createServer(function (request, response) { 
+	response.writeHead(200, { "Content-Type": "text/plain" });
+	response.write("DirtyBot is running!\n");
+	response.end();
+}).listen(process.env.PORT || 5000);
+
 // Get the email and password
 var authDetails = require("../auth.json");
  
@@ -117,7 +124,7 @@ dirtyBot.on("message", function(msg){
 		
 		var roll = Math.floor(Math.random() * (max - min + 1)) + min;
 		
-		dirtyBot.sendMessage(msg.channel, msg.author.username + " rolled " + roll + "! Range: (" + min + " - " + max + ")");
+		dirtyBot.sendMessage(msg.channel,  "Range: (" + min + " - " + max + ")\n" + msg.author.username + " rolled " + roll + "!");
 		
 	// flip a coin
 	} else if (msg.content === "!flip") {
