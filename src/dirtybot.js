@@ -5,7 +5,7 @@ http.createServer(function (request, response) {
 	response.writeHead(200, { "Content-Type": "text/plain" });
 	response.write("DirtyBot is running!\n");
 	response.end();
-}).listen(process.env.PORT || 5000);
+}).listen(process.env.OPENSHIFT_NODEJS_PORT || 8080);
 
 // Get the email and password
 var authDetails = require("../auth.json");
