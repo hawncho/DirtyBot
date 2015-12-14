@@ -1,1 +1,1 @@
-worker: node src/dirtybot.js
+web: node src/dirtybot.js
