@@ -9,7 +9,10 @@ http.createServer(function (request, response) {
 
 // Get the email and password
 var authDetails = require("../auth.json");
- 
+
+// broskii
+var broskii = require("../broskii.json");
+
 var dirtyBot = new Discord.Client();
 
 // list of valid role colors
@@ -164,6 +167,10 @@ dirtyBot.on("message", function(msg){
 		var responseIndex = Math.floor(Math.random() * (response[answer].length));
 		
 		dirtyBot.sendMessage(msg.channel, response[answer][responseIndex]);
+	
+	// broskii
+	} else if (msg.content === "!broskii") {
+		dirtyBot.sendMessage(msg.channel, broskii.image);
 	}
 });
 
