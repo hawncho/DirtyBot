@@ -5,20 +5,21 @@ http.createServer(function (request, response) {
 	response.writeHead(200, { "Content-Type": "text/plain" });
 	response.write("DirtyBot is running!\n");
 	response.end();
-}).listen(process.env.PORT || 5000);
+}).listen(8080, "127.0.0.1");
 
 // Get the email and password
-var authDetails = require("../auth.json");
- 
-var dirtyBot = new Discord.Client();
+const authDetails = require("../auth.json");
+
+// broskii
+const broskii = require("../data/broskii.json");
 
 // list of valid role colors
-const validColors = ["green", "emerald", "blue", "cyan", "indigo", "violet", "red", "magenta", "gold", "yellow", "redorange", "orange"];
+const validColors = require("../data/colors.json");
 
-const response = {
-	0: ["Yes.", "Absolutely.", "You should do it twice.", "Fo' shizzle.", "You bet.", "Sure.", "Go right ahead."],
-	1: ["No.", "Nah.", "Nope", "Definitely not.", "Nah, bitch.", "Nononononono.", "Maybe another time.", ]
-};
+// set of yes or no responses
+const response = require("../data/responses.json");
+
+var dirtyBot = new Discord.Client();
 
 var userToChannel = [];
 
@@ -96,7 +97,7 @@ dirtyBot.on("message", function(msg){
 			"!color <color> - Set your name color.\n" + 
 			"!flip - Flip a coin.\n" + 
 			"!roll <min>-<max> - Roll a random number between <min> and <max>.\n" +
-			"!shouldi <question> - Ask DirtyBot a yes or no question. (Also works with !shouldhe, !shouldshe, ...)"
+			"!should <question> - Ask DirtyBot a yes or no question."
 		);
 	
 	// add the user to the role with a specified color
@@ -136,11 +137,7 @@ dirtyBot.on("message", function(msg){
 		dirtyBot.sendMessage(msg.channel, msg.author.username + " flipped and got " + result + "!");
 	
 	// answer a yes/no question
-	} else if (msg.content.indexOf("!shouldi") === 0 ||
-				msg.content.indexOf("!shouldhe") === 0 ||
-				msg.content.indexOf("!shouldshe") === 0 ||
-				msg.content.indexOf("!shouldwe") === 0 ||
-				msg.content.indexOf("!shouldthey") === 0) {
+	} else if (msg.content.indexOf("!should") === 0) {
 		var answer = 0;
 	
 		if (trueOrFalse()) answer = 1;
@@ -148,6 +145,10 @@ dirtyBot.on("message", function(msg){
 		var responseIndex = Math.floor(Math.random() * (response[answer].length));
 		
 		dirtyBot.sendMessage(msg.channel, response[answer][responseIndex]);
+	
+	// broskii
+	} else if (msg.content === "!broskii") {
+		dirtyBot.sendMessage(msg.channel, broskii.image);
 	}
 });
 
