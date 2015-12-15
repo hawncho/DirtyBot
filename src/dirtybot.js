@@ -10,10 +10,6 @@ http.createServer(function (request, response) {
 		response.writeHead(200, { "Content-Type": "text/plain" });
 		response.write("DirtyBot is running!\n");
 		response.end();
-	} else if (request.method == 'POST') {
-		request.on('data', function (data) {
-			console.log("POST: " + data);
-		});
 	}
 	
 }).listen(serverDetails.port, serverDetails.ip);
