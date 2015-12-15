@@ -76,19 +76,19 @@ dirtyBot.on("raw", function (packet) {
 				if (oldChannelId) {
 					oldChannel = dirtyBot.channels.get("id", oldChannelId);
 					
-					statusMessage = user.username + " moved from \"" + oldChannel.name + "\" to \"" + channel.name + "\".";
+					statusMessage = user + " moved from \"" + oldChannel.name + "\" to \"" + channel.name + "\".";
 				} else {
-					statusMessage = user.username + " has joined \"" + channel.name + "\".";
+					statusMessage = user + " has joined \"" + channel.name + "\".";
 				}
 			} else {
 				userToChannel[user.id] = null;
 				
-				statusMessage = user.username + " has left the server.";
+				statusMessage = user + " has left the server.";
 			}
 			
 			dirtyBot.sendMessage(server.defaultChannel, statusMessage);
 			
-			console.log(server.name + ": " + statusMessage);
+			console.log(server.name + ": " + statusMessage + " (" + user.username + ")");
 			
 			break;
 	}
@@ -100,11 +100,11 @@ dirtyBot.on("message", function(msg){
 	if (msg.content === "!help") {
 		dirtyBot.sendMessage(msg.channel, 
 			"\n" +
-			"!help - Show a list of all commands.\n" +
-			"!color <color> - Set your name color.\n" + 
-			"!flip - Flip a coin.\n" + 
-			"!roll <min>-<max> - Roll a random number between <min> and <max>.\n" +
-			"!should <question> - Ask DirtyBot a yes or no question."
+			"**!help** - Show a list of all commands.\n" +
+			"**!color** *<color>* - Set your name color.\n" + 
+			"**!flip** - Flip a coin.\n" + 
+			"**!roll** *<min>-<max>* - Roll a random number between <min> and <max>.\n" +
+			"**!should** *<question>* - Ask DirtyBot a yes or no question."
 		);
 	
 	// add the user to the role with a specified color
@@ -132,7 +132,7 @@ dirtyBot.on("message", function(msg){
 		
 		var roll = Math.floor(Math.random() * (max - min + 1)) + min;
 		
-		dirtyBot.sendMessage(msg.channel,  "Range: (" + min + " - " + max + ")\n" + msg.author.username + " rolled " + roll + "!");
+		dirtyBot.sendMessage(msg.channel,  "Range: (" + min + " - " + max + ")\n" + msg.author + " rolled " + roll + "!");
 		
 	// flip a coin
 	} else if (msg.content === "!flip") {
@@ -141,7 +141,7 @@ dirtyBot.on("message", function(msg){
 		if (trueOrFalse()) result = "HEADS";
 		else result = "TAILS";
 		
-		dirtyBot.sendMessage(msg.channel, msg.author.username + " flipped and got " + result + "!");
+		dirtyBot.sendMessage(msg.channel, msg.author + " flipped and got " + result + "!");
 	
 	// answer a yes/no question
 	} else if (msg.content.indexOf("!should") === 0) {
