@@ -1,11 +1,22 @@
 var Discord = require("discord.js");
 
+// ip and port info for http server
+const serverDetails = require("../config.json");
+
 var http = require('http');
 http.createServer(function (request, response) { 
-	response.writeHead(200, { "Content-Type": "text/plain" });
-	response.write("DirtyBot is running!\n");
-	response.end();
-}).listen(8080, "127.0.0.1");
+	
+	if (request.method == 'GET') {
+		response.writeHead(200, { "Content-Type": "text/plain" });
+		response.write("DirtyBot is running!\n");
+		response.end();
+	} else if (request.method == 'POST') {
+		request.on('data', function (data) {
+			console.log("POST: " + data);
+		});
+	}
+	
+}).listen(serverDetails.port, serverDetails.ip);
 
 // Get the email and password
 const authDetails = require("../auth.json");
