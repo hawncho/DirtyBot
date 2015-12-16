@@ -190,7 +190,7 @@ function setUserColor(user, color, channel) {
 	if (validColors.indexOf(color) !== -1) {
 		removeAllColorRoles(user, channel.server);
 	
-		var role = channel.server.roles.get("name", "@" + color);
+		var role = channel.server.roles.get("name", color);
 		
 		// if there are existing color roles to remove,
 		// wait for them to be removed before adding the new role
@@ -245,7 +245,7 @@ function isColorRole(role) {
 	var color;
 	for (var i = 0; i < validColors.length; i++) {
 		color = validColors[i];
-		if (role.name === "@" + color) return true;
+		if (role.name === color) return true;
 	}
 }
 
