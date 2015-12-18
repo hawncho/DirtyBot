@@ -181,7 +181,7 @@ dirtyBot.on("message", function(msg){
 		
 		if (user) {
 			var serverId = msg.channel.server.id;
-			var channel = isUserInServer(user.id, serverId);
+			var channel = isUserInServer(user, serverId);
 			if (channel) {
 				dirtyBot.sendMessage(msg.channel, user + " is in " + channel + " right now!");
 				return;
@@ -294,8 +294,10 @@ function isColorRole(role) {
 	}
 }
 
-function isUserInServer(userId, serverId) {
-	var channelId = userToChannel[userId];
+function isUserInServer(user, serverId) {
+	if (user.status !== "offline") return null;
+
+	var channelId = userToChannel[user.id];
 	if (channelId) {
 		var channel = dirtyBot.channels.get("id", channelId);
 		if (channel.server.id == serverId) {
