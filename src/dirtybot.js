@@ -88,9 +88,9 @@ dirtyBot.on("raw", function (packet) {
 				if (oldChannelId) {
 					oldChannel = dirtyBot.channels.get("id", oldChannelId);
 					
-					statusMessage = user + " moved from \"" + oldChannel.name + "\" to \"" + channel.name + "\".";
+					statusMessage = user + " moved from " + oldChannel + " to " + channel + ".";
 				} else {
-					statusMessage = user + " has joined \"" + channel.name + "\".";
+					statusMessage = user + " has joined " + channel + ".";
 				}
 			} else {
 				userToChannel[user.id] = null;
