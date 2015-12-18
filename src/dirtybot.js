@@ -1,9 +1,10 @@
 var Discord = require("discord.js");
+var http = require('http');
+var fs = require("fs");
 
 // ip and port info for http server
 const serverDetails = require("../config.json");
 
-var http = require('http');
 http.createServer(function (request, response) { 
 	
 	if (request.method == 'GET') {
@@ -14,17 +15,28 @@ http.createServer(function (request, response) {
 	
 }).listen(serverDetails.port, serverDetails.ip);
 
-// Get the email and password
-const authDetails = require("../auth.json");
+const rootDir = "../";
+const dataDir = rootDir + "data/";
 
-// broskii
-const broskii = require("../data/broskii.json");
+const authFile = "auth.json";
+const broskiiFile = "broskii.json";
+const colorFile = "colors.json";
+const responseFile = "responses.json";
+const lastOnlineFile = "lastonline.json";
+
+// Get the email and password
+const authDetails = require(rootDir + "auth.json");
+
+const broskii = require(dataDir + "broskii.json");
 
 // list of valid role colors
-const validColors = require("../data/colors.json");
+const validColors = require(dataDir + "colors.json");
 
 // set of yes or no responses
-const response = require("../data/responses.json");
+const response = require(dataDir + "responses.json");
+
+// last-online data
+var lastOnline = require(dataDir + "lastonline.json");
 
 var dirtyBot = new Discord.Client();
 
@@ -83,6 +95,11 @@ dirtyBot.on("raw", function (packet) {
 			} else {
 				userToChannel[user.id] = null;
 				
+				if (!lastOnline[server.id]) lastOnline[server.id] = {};
+				
+				lastOnline[server.id][user.id] = Date.now();
+				fs.writeFileSync("./data/" + lastOnlineFile, JSON.stringify(lastOnline));
+				
 				statusMessage = user + " has left the server.";
 			}
 			
@@ -102,6 +119,7 @@ dirtyBot.on("message", function(msg){
 			"\n" +
 			"**!help** - Show a list of all commands.\n" +
 			"**!color** *<color>* - Set your name color.\n" + 
+			"**!last** @*<username>* - Check when @username was last online.\n" +
 			"**!flip** - Flip a coin.\n" + 
 			"**!roll** *<min>-<max>* - Roll a random number between <min> and <max>.\n" +
 			"**!should** *<question>* - Ask DirtyBot a yes or no question."
@@ -156,6 +174,33 @@ dirtyBot.on("message", function(msg){
 	// broskii
 	} else if (msg.content === "!broskii") {
 		dirtyBot.sendMessage(msg.channel, broskii.image);
+		
+	// last online
+	} else if (msg.content.indexOf("!last") === 0) {
+		var user = msg.mentions[0];
+		
+		if (user) {
+			var serverId = msg.channel.server.id;
+			var channel = isUserInServer(user.id, serverId);
+			if (channel) {
+				dirtyBot.sendMessage(msg.channel, user + " is in " + channel + " right now!");
+				return;
+			}
+			
+			var serverData = lastOnline[serverId];
+			if (serverData) {
+				var userLastOnline = serverData[user.id];
+			
+				if (userLastOnline) {
+					var timeSince = Date.now() - userLastOnline;
+				
+					dirtyBot.sendMessage(msg.channel, user + " was last in this server " + convertToReadableTime(timeSince) + " ago.");
+					return;
+				}
+			}
+			
+			dirtyBot.sendMessage(msg.channel, "I have no records of " + user + ".");
+		}
 	}
 });
 
@@ -247,6 +292,46 @@ function isColorRole(role) {
 		color = validColors[i];
 		if (role.name === color) return true;
 	}
+}
+
+function isUserInServer(userId, serverId) {
+	var channelId = userToChannel[userId];
+	if (channelId) {
+		var channel = dirtyBot.channels.get("id", channelId);
+		if (channel.server.id == serverId) {
+			return channel;
+		}
+	}
+	return null;
+}
+
+function convertToReadableTime(milliseconds) {
+	var seconds = Math.floor(milliseconds / 1000);
+	milliseconds -= seconds * 1000;
+	
+	var minutes = Math.floor(seconds / 60);
+	seconds -= minutes * 60;
+	
+	var hours = Math.floor(minutes / 60);
+	minutes -= hours * 60;
+	
+	var days = Math.floor(hours / 24);
+	hours -= days * 24;
+	
+	const _seconds = 0
+	const _minutes = 1;
+	const _hours = 2;
+	const _days = 3;
+	var isZero = [seconds == 0, minutes == 0, hours == 0, days == 0];
+	var isLabelPlural = [seconds != 1, minutes != 1, hours != 1, days != 1];
+	
+	var readable;
+	readable = seconds + (isLabelPlural[_seconds] ? " seconds" : " second");
+	if (!isZero[_minutes] || !isZero[_hours] || !isZero[_days]) { readable = minutes + (isLabelPlural[_minutes] ? " minutes and " : " minute and ") + readable; }
+	if (!isZero[_hours] || !isZero[_days]) { readable = hours + (isLabelPlural[_hours] ? " hours, " : " hour, ") + readable; }
+	if (!isZero[_days]) { readable = days + (isLabelPlural[_days] ? " days, " : " day, ") + readable; }
+	
+	return readable;
 }
 
 function trueOrFalse() {
