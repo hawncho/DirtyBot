@@ -295,7 +295,7 @@ function isColorRole(role) {
 }
 
 function isUserInServer(user, serverId) {
-	if (user.status !== "offline") return null;
+	if (user.status === "offline") return null;
 
 	var channelId = userToChannel[user.id];
 	if (channelId) {
