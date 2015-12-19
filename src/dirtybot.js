@@ -48,6 +48,7 @@ dirtyBot.on("ready", function () {
 	const defaultChannelId = dirtyBot.channels.get("name", "The Dirty Den").id;
 	
 	// track all online user's current voice channel
+	/*
 	var user;
 	for (var i = 0; i < dirtyBot.users.length; i++) {
 		user = dirtyBot.users[i];
@@ -55,6 +56,7 @@ dirtyBot.on("ready", function () {
 			userToChannel[user.id] = defaultChannelId;
 		}
 	}
+	*/
 		
 	console.log("Ready to begin! Serving in " + dirtyBot.channels.length + " channels");
 });
