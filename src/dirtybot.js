@@ -203,6 +203,12 @@ dirtyBot.on("message", function(msg){
 			
 			dirtyBot.sendMessage(msg.channel, "I have no records of " + user + ".");
 		}
+	} else if (msg.content === "!debug") {
+		console.log("----------------------------");
+		for (var i = 0; i < userToChannel.length; i++) {
+			console.log(userToChannel[i]);
+		}
+		console.log("----------------------------");
 	}
 });
 
@@ -297,15 +303,25 @@ function isColorRole(role) {
 }
 
 function isUserInServer(user, serverId) {
-	if (user.status === "offline") return null;
+	if (user.status === "offline") { console.log(user + " not in server (offline)"); return null; }
 
 	var channelId = userToChannel[user.id];
+	console.log("stored channel: " + channelId + " for " + user);
 	if (channelId) {
 		var channel = dirtyBot.channels.get("id", channelId);
+		
+		console.log("stored: " + channel.name + " === requesting from: " + serverId);
+		console.log("stored: " + channel.server.id + " === requesting from: " + serverId);
+		
 		if (channel.server.id == serverId) {
+			
+			console.log(user + " IS in the server (" + channel.name + ")");
+			
 			return channel;
 		}
 	}
+	
+	console.log(user + " IS NOT in this server.");
 	return null;
 }
 
