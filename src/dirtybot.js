@@ -82,7 +82,7 @@ dirtyBot.on("voiceJoin", function (user, channel) {
 	if (oldChannel == null || oldChannel.server.id != server.id) {
 		console.log(server.name + ": " + user.username + " has joined " + channel.name + ".");
 		dirtyBot.sendMessage(server.defaultChannel, user + " has joined " + channel + ".");
-	} else {
+	} else if (oldChannel.id != channel.id) {
 		console.log(server.name + ": " + user.username + " moved from " + oldChannel.name + " to " + channel.name + ".");
 		dirtyBot.sendMessage(server.defaultChannel, user + " moved from " + oldChannel + " to " + channel + ".");
 	}
