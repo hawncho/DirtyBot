@@ -1,5 +1,5 @@
 # DirtyBot
-A Discord bot built using the unofficial Discord interface discord.js 5.0.0 (https://github.com/hydrabolt/discord.js). 
+A Discord bot built using the unofficial Discord interface discord.js 5.3.1 (https://github.com/hydrabolt/discord.js). 
 
 ### Features
 - DirtyBot keeps track of the active voice channel of each user. It will send notifications of movement between voice channels in the Discord server's default text channel. 
@@ -16,5 +16,5 @@ Command    | Description
 ### Dependencies
 Dependency    | Version       | Website
 ------------- | ------------- | ------------- 
-discord.js    | 5.0.0         | https://github.com/hydrabolt/discord.js
+discord.js    | 5.3.1         | https://github.com/hydrabolt/discord.js
 Node.js       | 5.2.0         | https://nodejs.org/en/
