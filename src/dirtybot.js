@@ -47,10 +47,9 @@ dirtyBot.on("ready", function () {
 	// store a map of the voice channel each user is currently connected to
 	var allUsers = dirtyBot.users;
 	var user;
-	var channel;
 	for (var i = 0; i < allUsers.length; i++) {
 		user = allUsers[i];
-		userIdToChannel[user.id] = channel;
+		userIdToChannel[user.id] = user.voiceChannel;
 	}
 
 	console.log("Ready to begin! Serving in " + dirtyBot.channels.length + " channels");
