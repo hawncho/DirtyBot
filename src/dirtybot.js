@@ -1,9 +1,10 @@
 var Discord = require("discord.js");
+var http = require('http');
+var fs = require("fs");
 
 // ip and port info for http server
 const serverDetails = require("../config.json");
 
-var http = require('http');
 http.createServer(function (request, response) { 
 	
 	if (request.method == 'GET') {
@@ -14,36 +15,44 @@ http.createServer(function (request, response) {
 	
 }).listen(serverDetails.port, serverDetails.ip);
 
-// Get the email and password
-const authDetails = require("../auth.json");
+const rootDir = "../";
+const dataDir = rootDir + "data/";
 
-// broskii
-const broskii = require("../data/broskii.json");
+const authFile = "auth.json";
+const broskiiFile = "broskii.json";
+const colorFile = "colors.json";
+const responseFile = "responses.json";
+const lastOnlineFile = "lastonline.json";
+
+// Get the email and password
+const authDetails = require(rootDir + "auth.json");
+
+const broskii = require(dataDir + "broskii.json");
 
 // list of valid role colors
-const validColors = require("../data/colors.json");
+const validColors = require(dataDir + "colors.json");
 
 // set of yes or no responses
-const response = require("../data/responses.json");
+const response = require(dataDir + "responses.json");
+
+// last-online data
+var lastOnline = require(dataDir + "lastonline.json");
 
 var dirtyBot = new Discord.Client();
 
-var userToChannel = [];
+var userIdToChannel = [];
 
 // when the bot is ready
 dirtyBot.on("ready", function () {
-	// temporary until I find a way to see what voice channel a user is currently in
-	const defaultChannelId = dirtyBot.channels.get("name", "The Dirty Den").id;
-	
-	// track all online user's current voice channel
+	// store a map of the voice channel each user is currently connected to
+	var allUsers = dirtyBot.users;
 	var user;
-	for (var i = 0; i < dirtyBot.users.length; i++) {
-		user = dirtyBot.users[i];
-		if (user.status !== "offline") {
-			userToChannel[user.id] = defaultChannelId;
-		}
+	var channel;
+	for (var i = 0; i < allUsers.length; i++) {
+		user = allUsers[i];
+		userIdToChannel[user.id] = channel;
 	}
-		
+
 	console.log("Ready to begin! Serving in " + dirtyBot.channels.length + " channels");
 });
 
@@ -60,38 +69,43 @@ dirtyBot.on("raw", function (packet) {
 		// when a user joins or leaves a channel
 		// or when a user has their voice status (mute, deaf) changed
 		case "VOICE_STATE_UPDATE":
-			var server = dirtyBot.servers.get("id", packet.d.guild_id);
-			var user = dirtyBot.users.get("id", packet.d.user_id);
-			var channel = dirtyBot.channels.get("id", packet.d.channel_id);
-			
-			var statusMessage;
-			
-			if (channel) {
-				var oldChannelId = userToChannel[user.id];
-				
-				if (oldChannelId === channel.id) break;
-				
-				userToChannel[user.id] = channel.id;
-				
-				if (oldChannelId) {
-					oldChannel = dirtyBot.channels.get("id", oldChannelId);
-					
-					statusMessage = user + " moved from \"" + oldChannel.name + "\" to \"" + channel.name + "\".";
-				} else {
-					statusMessage = user + " has joined \"" + channel.name + "\".";
-				}
-			} else {
-				userToChannel[user.id] = null;
-				
-				statusMessage = user + " has left the server.";
-			}
-			
-			dirtyBot.sendMessage(server.defaultChannel, statusMessage);
-			
-			console.log(server.name + ": " + statusMessage + " (" + user.username + ")");
-			
 			break;
 	}
+});
+
+// when a user joins a voice channel
+dirtyBot.on("voiceJoin", function (user, channel) {
+	var server = channel.server;
+	var oldChannel = userIdToChannel[user.id];
+	
+	// if the user was not previously connected to a voice channel or joined from a different server
+	if (oldChannel == null || oldChannel.server.id != server.id) {
+		console.log(server.name + ": " + user.username + " has joined " + channel.name + ".");
+		dirtyBot.sendMessage(server.defaultChannel, user + " has joined " + channel + ".");
+	} else {
+		console.log(server.name + ": " + user.username + " moved from " + oldChannel.name + " to " + channel.name + ".");
+		dirtyBot.sendMessage(server.defaultChannel, user + " moved from " + oldChannel + " to " + channel + ".");
+	}
+	
+	// update the user ID to voice channel mapping
+	userIdToChannel[user.id] = channel;
+});
+
+// when a user leaves all voice channels in the server
+dirtyBot.on("voiceLeave", function (user, channel) {
+	var server = channel.server;
+	console.log(server.name + ": " + user.username + " has left the server. (" + channel.name + ")");
+	dirtyBot.sendMessage(server.defaultChannel, user + " has left the server.");
+	
+	// if there are no records for this server, create a blank record
+	if (!lastOnline[server.id]) lastOnline[server.id] = {};
+	
+	// record the timestamp of the user leaving
+	lastOnline[server.id][user.id] = Date.now();
+	fs.writeFileSync("./data/" + lastOnlineFile, JSON.stringify(lastOnline));
+	
+	// update the user ID to voice channel mapping
+	userIdToChannel[user.id] = null;
 });
 
 // when the bot receives a message
@@ -102,6 +116,7 @@ dirtyBot.on("message", function(msg){
 			"\n" +
 			"**!help** - Show a list of all commands.\n" +
 			"**!color** *<color>* - Set your name color.\n" + 
+			"**!last** @*<username>* - Check when @username was last online.\n" +
 			"**!flip** - Flip a coin.\n" + 
 			"**!roll** *<min>-<max>* - Roll a random number between <min> and <max>.\n" +
 			"**!should** *<question>* - Ask DirtyBot a yes or no question."
@@ -156,6 +171,33 @@ dirtyBot.on("message", function(msg){
 	// broskii
 	} else if (msg.content === "!broskii") {
 		dirtyBot.sendMessage(msg.channel, broskii.image);
+		
+	// last online
+	} else if (msg.content.indexOf("!last") === 0) {
+		var user = msg.mentions[0];
+		
+		if (user) {
+			var serverId = msg.channel.server.id;
+			var channel = isUserInServer(user, serverId);
+			if (channel) {
+				dirtyBot.sendMessage(msg.channel, user + " is in " + channel + " right now!");
+				return;
+			}
+			
+			var serverData = lastOnline[serverId];
+			if (serverData) {
+				var userLastOnline = serverData[user.id];
+			
+				if (userLastOnline) {
+					var timeSince = Date.now() - userLastOnline;
+				
+					dirtyBot.sendMessage(msg.channel, user + " was last in this server " + convertToReadableTime(timeSince) + " ago.");
+					return;
+				}
+			}
+			
+			dirtyBot.sendMessage(msg.channel, "I have no records of " + user + ".");
+		}
 	}
 });
 
@@ -247,6 +289,45 @@ function isColorRole(role) {
 		color = validColors[i];
 		if (role.name === color) return true;
 	}
+}
+
+function isUserInServer(user, serverId) {
+	var channel = user.voiceChannel;
+	if (channel) {
+		if (channel.server.id == serverId) {
+			return channel;
+		}
+	}
+	return null;
+}
+
+function convertToReadableTime(milliseconds) {
+	var seconds = Math.floor(milliseconds / 1000);
+	milliseconds -= seconds * 1000;
+	
+	var minutes = Math.floor(seconds / 60);
+	seconds -= minutes * 60;
+	
+	var hours = Math.floor(minutes / 60);
+	minutes -= hours * 60;
+	
+	var days = Math.floor(hours / 24);
+	hours -= days * 24;
+	
+	const _seconds = 0
+	const _minutes = 1;
+	const _hours = 2;
+	const _days = 3;
+	var isZero = [seconds == 0, minutes == 0, hours == 0, days == 0];
+	var isLabelPlural = [seconds != 1, minutes != 1, hours != 1, days != 1];
+	
+	var readable;
+	readable = seconds + (isLabelPlural[_seconds] ? " seconds" : " second");
+	if (!isZero[_minutes] || !isZero[_hours] || !isZero[_days]) { readable = minutes + (isLabelPlural[_minutes] ? " minutes and " : " minute and ") + readable; }
+	if (!isZero[_hours] || !isZero[_days]) { readable = hours + (isLabelPlural[_hours] ? " hours, " : " hour, ") + readable; }
+	if (!isZero[_days]) { readable = days + (isLabelPlural[_days] ? " days, " : " day, ") + readable; }
+	
+	return readable;
 }
 
 function trueOrFalse() {
