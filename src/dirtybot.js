@@ -174,13 +174,18 @@ dirtyBot.on("message", function(msg){
 	// last online
 	} else if (msg.content.indexOf("!last") === 0) {
 		var user = msg.mentions[0];
+		// if the message was "!lastanyway"
+		var forceQuery = msg.content.indexOf("anyway") === 5; 
 		
 		if (user) {
 			var serverId = msg.channel.server.id;
-			var channel = isUserInServer(user, serverId);
-			if (channel) {
-				dirtyBot.sendMessage(msg.channel, user + " is in " + channel + " right now!");
-				return;
+			
+			if (!forceQuery) {
+				var channel = isUserInServer(user, serverId);
+				if (channel) {
+					dirtyBot.sendMessage(msg.channel, user + " is in " + channel + " right now!");
+					return;
+				}
 			}
 			
 			var serverData = lastOnline[serverId];
