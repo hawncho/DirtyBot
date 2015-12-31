@@ -116,6 +116,7 @@ dirtyBot.on("message", function(msg){
 			"**!help** - Show a list of all commands.\n" +
 			"**!color** *<color>* - Set your name color.\n" + 
 			"**!last** @*<username>* - Check when @username was last online.\n" +
+			"**!lastanyway** @*<username>* - Force-check when @username was last online.\n" +
 			"**!flip** - Flip a coin.\n" + 
 			"**!roll** *<min>-<max>* - Roll a random number between <min> and <max>.\n" +
 			"**!should** *<question>* - Ask DirtyBot a yes or no question."
